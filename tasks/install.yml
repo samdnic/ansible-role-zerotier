@@ -1,11 +1,11 @@
 ---
-- block: # Add zerotier repo and it's gpg key
-  - name: Add zerotier gpg key
+- block: # Add zerotier repo and it's gpg key for EL
+  - name: Add zerotier gpg key (RPM)
     rpm_key:
       state: present
       key: https://download.zerotier.com/contact%40zerotier.com.gpg
 
-  - name: Add zerotier repo
+  - name: Add zerotier repo (RPM)
     yum_repository:
       name: zerotier
       description: ZeroTier, Inc. RPM Release Repository
@@ -17,6 +17,26 @@
   tags:
   - installation
   - repositories
+
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- block: # Add zerotier repo and it's gpg key for Ubuntu
+  - name: Add zerotier gpg key (DEB)
+    apt_key:
+      state: present
+      url: https://download.zerotier.com/contact%40zerotier.com.gpg
+
+  - name: Add zerotier repo (DEB)
+    apt_repository:
+      repo: deb https://download.zerotier.com/debian/{{ ansible_distribution_release }} {{ ansible_distribution_release }} main
+      state: present
+    register: zerotier_repo
+
+  tags:
+  - installation
+  - repositories
+
+  when: ansible_distribution == 'Ubuntu' or ansible_distribution == 'Debian'
 
 - block: #Install and enable zerotier-one
   - name: Install zerotier-one
